@@ -6,6 +6,7 @@ import com.vaccine.enums.*;
 import com.vaccine.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -16,10 +17,13 @@ public class TestDataRunner implements CommandLineRunner {
 
     private final UserRepository userRepo;
     private final AppointmentRepository apptRepo;
+    private final PasswordEncoder passwordEncoder;
 
-    public TestDataRunner(UserRepository userRepo, AppointmentRepository apptRepo) {
+    public TestDataRunner(UserRepository userRepo, AppointmentRepository apptRepo,
+                          PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.apptRepo = apptRepo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class TestDataRunner implements CommandLineRunner {
         User u = new User();
         u.setName(name);
         u.setEmail(email);
-        u.setPassword("temp123");   // plain text only for now; BCrypt on Day 5
+        u.setPassword(passwordEncoder.encode("password123"));   // plain text only for now; BCrypt on Day 5
         u.setPhone("9999999999");
         u.setAge(25);
         u.setRole(Role.USER);

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,23 +25,23 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public UserResponse me(@RequestParam("userId") Long userId) {
+    public UserResponse me(@AuthenticationPrincipal Long userId) {
         return userService.getUser(userId);
     }
 
     @GetMapping("/status")
-    public StatusResponse status(@RequestParam("userId") Long userId) {
+    public StatusResponse status(@AuthenticationPrincipal Long userId) {
         return appointmentService.getStatus(userId);
     }
 
     @GetMapping("/appointments")
-    public List<AppointmentResponse> appointments(@RequestParam("userId") Long userId) {
+    public List<AppointmentResponse> appointments(@AuthenticationPrincipal Long userId) {
         return appointmentService.listForUser(userId);
     }
 
     @PostMapping("/book")
     public ResponseEntity<AppointmentResponse> book(
-            @RequestParam("userId") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestParam("type") VaccineType type,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
