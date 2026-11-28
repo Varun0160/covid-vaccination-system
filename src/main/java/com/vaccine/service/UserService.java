@@ -1,5 +1,6 @@
 package com.vaccine.service;
 
+import com.vaccine.dto.AdminSummary;
 import com.vaccine.dto.AdminUserRow;
 import com.vaccine.dto.UserResponse;
 import com.vaccine.entity.Appointment;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +33,26 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminUserRow> getAllUsersForAdmin() {
-        return userRepo.findByRole(Role.USER).stream().map(this::toRow).toList();
+    public List<AdminUserRow> getAllUsersForAdmin(String search, OverallStatus status) {
+        String q = (search == null || search.isBlank()) ? null : search.trim().toLowerCase(Locale.ROOT);
+
+        return userRepo.findByRole(Role.USER).stream()
+                .filter(u -> q == null
+                        || u.getName().toLowerCase(Locale.ROOT).contains(q)
+                        || u.getEmail().toLowerCase(Locale.ROOT).contains(q))
+                .map(this::toRow)
+                .filter(row -> status == null || row.overall() == status)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminSummary getSummary() {
+        List<AdminUserRow> rows = getAllUsersForAdmin(null, null);
+        return new AdminSummary(
+                rows.size(),
+                rows.stream().filter(r -> r.overall() == OverallStatus.FULLY_VACCINATED).count(),
+                rows.stream().filter(r -> r.overall() == OverallStatus.PARTIALLY_VACCINATED).count(),
+                rows.stream().filter(r -> r.overall() == OverallStatus.NOT_VACCINATED).count());
     }
 
     private AdminUserRow toRow(User u) {

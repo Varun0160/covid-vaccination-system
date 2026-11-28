@@ -5,6 +5,7 @@ import com.vaccine.entity.User;
 import com.vaccine.enums.*;
 import com.vaccine.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,15 @@ import java.time.LocalDate;
 
 @Component
 @Order(1)
-public class TestDataRunner implements CommandLineRunner {
+@Profile("dev")
+public class DevDataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepo;
     private final AppointmentRepository apptRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public TestDataRunner(UserRepository userRepo, AppointmentRepository apptRepo,
-                          PasswordEncoder passwordEncoder) {
+    public DevDataSeeder(UserRepository userRepo, AppointmentRepository apptRepo,
+                         PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.apptRepo = apptRepo;
         this.passwordEncoder = passwordEncoder;

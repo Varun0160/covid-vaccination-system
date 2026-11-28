@@ -1,15 +1,16 @@
 package com.vaccine.controller;
 
 import com.vaccine.dto.AppointmentResponse;
+import com.vaccine.dto.CertificateFile;
 import com.vaccine.dto.StatusResponse;
 import com.vaccine.dto.UserResponse;
 import com.vaccine.enums.VaccineType;
 import com.vaccine.service.AppointmentService;
+import com.vaccine.service.CertificateService;
 import com.vaccine.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class UserController {
 
     private final AppointmentService appointmentService;
     private final UserService userService;
+    private final CertificateService certificateService;
 
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal Long userId) {
@@ -47,5 +49,16 @@ public class UserController {
 
         var created = appointmentService.book(userId, type, date);
         return ResponseEntity.status(HttpStatus.CREATED).body(AppointmentResponse.from(created));
+    }
+
+    @GetMapping("/certificate/{type}")
+    public ResponseEntity<byte[]> certificate(@AuthenticationPrincipal Long userId,
+                                              @PathVariable("type") VaccineType type) {
+        CertificateFile file = certificateService.generate(userId, type);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(file.fileName()).build().toString())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(file.content());
     }
 }

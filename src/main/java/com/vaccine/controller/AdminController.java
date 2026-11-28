@@ -1,7 +1,9 @@
 package com.vaccine.controller;
 
+import com.vaccine.dto.AdminSummary;
 import com.vaccine.dto.AdminUserRow;
 import com.vaccine.dto.AppointmentResponse;
+import com.vaccine.enums.OverallStatus;
 import com.vaccine.service.AppointmentService;
 import com.vaccine.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,15 @@ public class AdminController {
     private final AppointmentService appointmentService;
 
     @GetMapping("/users")
-    public List<AdminUserRow> allUsers() {
-        return userService.getAllUsersForAdmin();
+    public List<AdminUserRow> allUsers(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) OverallStatus status) {
+        return userService.getAllUsersForAdmin(search, status);
+    }
+
+    @GetMapping("/summary")
+    public AdminSummary summary() {
+        return userService.getSummary();
     }
 
     @PutMapping("/appointments/{id}/complete")
