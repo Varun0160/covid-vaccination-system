@@ -1,5 +1,6 @@
 package com.vaccine.service;
 
+import com.vaccine.dto.AppointmentResponse;
 import com.vaccine.dto.StatusResponse;
 import com.vaccine.entity.Appointment;
 import com.vaccine.entity.User;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -87,6 +89,7 @@ public class AppointmentService {
 
     @Transactional(readOnly = true)
     public StatusResponse getStatus(Long userId) {
+        userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         VaccineStatus a = vaccineStatus(userId, VaccineType.A);
         VaccineStatus b = vaccineStatus(userId, VaccineType.B);
         return new StatusResponse(a, b, overallStatus(userId),
@@ -95,6 +98,13 @@ public class AppointmentService {
     }
 
     // ---------- helper ----------
+
+    @Transactional(readOnly = true)
+    public List<AppointmentResponse> listForUser(Long userId) {
+        return appointmentRepo.findByUserId(userId).stream()
+                .map(AppointmentResponse::from)
+                .toList();
+    }
     private boolean has(Long userId, VaccineType type, AppointmentStatus status) {
         return appointmentRepo.existsByUserIdAndVaccineTypeAndStatus(userId, type, status);
     }

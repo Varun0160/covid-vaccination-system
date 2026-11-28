@@ -1,0 +1,50 @@
+package com.vaccine.controller;
+
+import com.vaccine.dto.AppointmentResponse;
+import com.vaccine.dto.StatusResponse;
+import com.vaccine.dto.UserResponse;
+import com.vaccine.enums.VaccineType;
+import com.vaccine.service.AppointmentService;
+import com.vaccine.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final AppointmentService appointmentService;
+    private final UserService userService;
+
+    @GetMapping("/me")
+    public UserResponse me(@RequestParam("userId") Long userId) {
+        return userService.getUser(userId);
+    }
+
+    @GetMapping("/status")
+    public StatusResponse status(@RequestParam("userId") Long userId) {
+        return appointmentService.getStatus(userId);
+    }
+
+    @GetMapping("/appointments")
+    public List<AppointmentResponse> appointments(@RequestParam("userId") Long userId) {
+        return appointmentService.listForUser(userId);
+    }
+
+    @PostMapping("/book")
+    public ResponseEntity<AppointmentResponse> book(
+            @RequestParam("userId") Long userId,
+            @RequestParam("type") VaccineType type,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        var created = appointmentService.book(userId, type, date);
+        return ResponseEntity.status(HttpStatus.CREATED).body(AppointmentResponse.from(created));
+    }
+}
